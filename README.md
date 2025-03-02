@@ -6,7 +6,7 @@
 
 ## Wan AI models
 Wan AI, the entity responsible for Alibaba Cloud's large-scale generative models, has [just released](https://www.reuters.com/technology/artificial-intelligence/alibaba-release-open-source-version-video-generating-ai-model-2025-02-25/) 
-Wan 2.1, a “comprehensive and open suite of video foundation models that pushes the boundaries of video generation”. 
+Wan 2.1, a “*comprehensive and open suite of video foundation models that pushes the boundaries of video generation*”. 
 
 Alibaba has released four variants of Wan 2.1 - T2V-1.3B, T2V-14B, I2V-14B-720P and I2V-14B-480P - 
 which generate images and videos from text and image input. This article will focus on the small 
@@ -28,21 +28,21 @@ To have a comparison basis for the output, we used the prompt published by Nvidi
 [Cosmos project](https://github.com/NVIDIA/Cosmos), launched in January 2025, to see the interpretation 
 of same words by different models. 
 
-It is (see Cosmos’ Github repo for prompt and resulting video):  "A sleek, humanoid robot stands in a vast warehouse 
+It is (see Cosmos’ Github repo for prompt and resulting video):  "*A sleek, humanoid robot stands in a vast warehouse 
 filled with neatly stacked cardboard boxes on industrial shelves. The robot's metallic body gleams under the bright, 
 even lighting, highlighting its futuristic design and intricate joints. A glowing blue light emanates from its chest, 
 adding a touch of advanced technology. The background is dominated by rows of boxes, suggesting a highly organized 
 storage system. The floor is lined with wooden pallets, enhancing the industrial setting. The camera remains static, 
 capturing the robot's poised stance amidst the orderly environment, with a shallow depth of field that keeps the focus 
-on the robot while subtly blurring the background for a cinematic effect."
+on the robot while subtly blurring the background for a cinematic effect*."
 
 The Wan project has added a nice interactive interface, based on [HuggingFace’s Gradio](https://www.gradio.app/), to more 
 easily enter the prompts. 
 
 ![Gradio-UI-for-Wan-v2.1.png](assets/Gradio-UI-for-Wan-v2.1.png))
 
-The video generated with 50 diffusion steps (which last approximately X minutes) from this prompt has been uploaded on 
-Youtube, you can watch it here.
+The video generated with 50 diffusion steps (whose processing lasts approximately 44.5 minutes for a video duration of 5s) 
+from this prompt has been uploaded on Youtube, you can watch it by clicking on image below.
 
 [![Wan2.1-generated robot](https://img.youtube.com/vi/5xnT9OjfhEY/0.jpg)](https://www.youtube.com/watch?v=5xnT9OjfhEY)
 
@@ -59,7 +59,7 @@ in Docker registry), which brings Pytorch, Nvidia’s CUDA and all their depende
 *	The Linux environment variable LD_LIBRARY_PATH has to be extended to allow dynamic loading of Mesa libraries as Pytorch needs 
 them at some point
 *	The model will look for the model weights in container directory /home/model/Wan-AI/<name of the model>. For this test, the model 
-is Wan2.1-T2V-1.3B, whose size is <> when loaded into the GPU. This respectable size limits the model of GPU that can be used 
+is Wan2.1-T2V-1.3B, whose size is approx 14GB when loaded onto the GPU (see output of `nvidia-smi` command below). This respectable size limits the model of GPU that can be used 
 for video generation: the  GPU board memory must accept the load of those weights plus those of associated computation binaries. 
 *	PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True torch.OutOfMemoryError: CUDA out of memory
 
