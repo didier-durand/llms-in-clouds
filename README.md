@@ -51,7 +51,8 @@ easily enter the prompts.
 
 ![Gradio-UI-for-Wan-v2.1.png](assets/Gradio-UI-for-Wan-v2.1.png))
 
-The video generated with 50 diffusion steps (whose processing lasts approximately 44.5 minutes for a video duration of 5s) 
+The video generated with 50 diffusion steps (whose processing lasts approximately 44.5 minutes for a video duration of 5s - 
+see last line of execution log on the AWS ECS cluster) 
 from this prompt has been uploaded on Youtube, you can watch it by clicking on image below.
 
 [![Wan2.1-generated robot](https://img.youtube.com/vi/5xnT9OjfhEY/0.jpg)](https://www.youtube.com/watch?v=5xnT9OjfhEY)
@@ -82,12 +83,15 @@ and dynamically change its configuration.
 *  The exposed port 7860 is the standard one used by Gradio.
 
 If you are not interested in building the model by yourself, we provide a pre-built 
-image at https://hub.docker.com/repository/docker/didierdurand/lic-wan-ai/general on Docker Hub. You can also easily build 
-your own customized image by forking this repo and adapt the Dockerfile to your needs and build it via the provided yaml 
-script building the image and pushing it to Docker Hub. This script based on standard [GitHub Actions](https://docs.github.com/en/actions).
+image with named `didierdurand/lic-wan-ai` (for your pulls). Details on Docker hub at [https://hub.docker.com/repository/docker/didierdurand/lic-wan-ai/general](https://hub.docker.com/repository/docker/didierdurand/lic-wan-ai/general) 
+on Docker Hub. You can also easily build your own customized image by forking this repo and adapt the Dockerfile to your needs and 
+build it via the [provided yaml script](.github/workflows/[build_docker_wan_ai.yaml) building the image and pushing it to Docker Hub 
+directly from GitHub build platform. This script based on standard [GitHub Actions](https://docs.github.com/en/actions).
 
 The Docker file is located at `docker/Dockerfile-wanv2_1`. All suggestions to improve it are welcome: 
-[open a ticket](https://github.com/didier-durand/llms-in-clouds/issues) for yours
+[open a ticket](https://github.com/didier-durand/llms-in-clouds/issues) for yours! 
+
+You can compare the outcome of your Docker builds with ours by going to the [Actions page of the repo](actions)
 
 For readability purposes, the Docker file copied here:
 
@@ -116,12 +120,6 @@ WORKDIR ${WAN_DIR}
 # install project requirements + xfuser for multi-GPU support
 RUN python -m pip install --upgrade -r requirements.txt \
     && python -m pip install --upgrade "xfuser==0.4.1"
-
-# ? used to have a regex which avoids COPY failure in absence of patch file
-ARG PATCH_SHELL="patch-wan-ai-2.1.sh"
-COPY "patch/${PATCH_SHELL}"? "${WAN_DIR}/"
-# hadolint ignore=SC2015
-RUN  test -f  ${PATCH_SHELL} && bash ${PATCH_SHELL} || true
 
 ARG MODEL_DIR="/home/model"
 # model dir must be created at image build time to allow volume bind on container start
