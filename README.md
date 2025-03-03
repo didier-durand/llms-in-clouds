@@ -4,6 +4,13 @@
     <img src="assets/wan-logo.png" width="200"/>
 <p>
 
+## Sections
+
+* [Wan AI models](#wan-ai-models)
+* [Execution tests](#execution-tests)
+* [Key aspects of Docker file](#key-aspects-of-docker-file)
+* [Execution on AWS ECS cluster](#execution-on-aws-ecs-cluster)
+
 ## Wan AI models
 Wan AI, the entity responsible for Alibaba Cloud's large-scale generative models, has [just released](https://www.reuters.com/technology/artificial-intelligence/alibaba-release-open-source-version-video-generating-ai-model-2025-02-25/) 
 Wan 2.1, a “*comprehensive and open suite of video foundation models that pushes the boundaries of video generation*”. 
@@ -16,7 +23,7 @@ See their [web site](https://wanxai.com/) for all details about the project.
 
 The Github repo is at [https://github.com/Wan-Video/Wan2.1](https://github.com/Wan-Video/Wan2.1)
 
-## Our tests
+## Execution tests
 
 Our goal is to evaluate those Wan models in a fully isolated and portable environment. 
 The Wan 2.1 project does not supply yet a Docker file to build and execute the project. 
@@ -51,24 +58,98 @@ For this test, Wan2.1-T2V-1.3B has been deployed in a ECS cluster on an EC2 inst
 featuring 4 x [NVIDIA L4 Tensor Core](https://www.nvidia.com/en-us/data-center/l4/) GPUs with 24GB of RAM 
 per GPU. 
 
-## Key aspects of created Docker file
+## Key aspects of Docker file
 
 This section describes the main aspects of this Dockerfile (available here) in case you need to customize it for reuse in your environment:
 *	It is based on the image pytorch/pytorch:2.6.0-cuda12.6-cudnn9-devel (sourced directly from Docker hub - size: 13GB+ when stored 
-in Docker registry), which brings Pytorch, Nvidia’s CUDA and all their dependencies.
+in Docker registry), which brings Pytorch, Nvidia’s CUDA and all their dependencies on top of Python 3.11 and Ubuntu 22.04 (Jammy Jellyfish)
 *	The Linux environment variable LD_LIBRARY_PATH has to be extended to allow dynamic loading of Mesa libraries as Pytorch needs 
-them at some point
+them in its execution
+*  The Linux environment variable PYTORCH_CUDA_ALLOC_CONF is set to `expandable_segments:True` to optimize GPU memory and avoid 
+some  errors of type `torch.OutOfMemoryError: CUDA out of memory`
 *	The model will look for the model weights in container directory /home/model/Wan-AI/<name of the model>. For this test, the model 
 is Wan2.1-T2V-1.3B, whose size is approx 14GB when loaded onto the GPU (see output of `nvidia-smi` command below). This respectable size limits the model of GPU that can be used 
 for video generation: the  GPU board memory must accept the load of those weights plus those of associated computation binaries. 
-*	PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True torch.OutOfMemoryError: CUDA out of memory
+* The Wan model is NOT included in the image to keep it generic and not too big. It is supposed to be accessible via a volume mounted when `docker run command` is executed. 
+So, import its files on the host system before starting the container and [mount the corresponding directory](https://docs.docker.com/engine/storage/volumes/#syntax). 
+On ECS, we run a command copying the model from S3 (to avoid fetching from HuggingFace on each start) to the EC2 instance providing 
+the compute capacity, when this instance starts.
+*  Several environment variables are defined to provide additional flexibility (`$MODEL,$MODEL_DIR,$LAUNCHER`) to be able to use 1 single image 
+and dynamically change its configuration.
+*  The exposed port 7860 is the standard one used by Gradio.
 
-If you are not interested in building the model by yourself, we provide a pre-built Docker 
-image at https://hub.docker.com/repository/docker/didierdurand/lic-wan-ai/general. You can also easily build your own by forking
-this  repo and adapt the Dockerfile to your needs and build it via the [Github Action](https://docs.github.com/en/actions) script 
-that is provided.
+If you are not interested in building the model by yourself, we provide a pre-built 
+image at https://hub.docker.com/repository/docker/didierdurand/lic-wan-ai/general on Docker Hub. You can also easily build 
+your own customized image by forking this repo and adapt the Dockerfile to your needs and build it via the provided yaml 
+script building the image and pushing it to Docker Hub. This script based on standard [GitHub Actions](https://docs.github.com/en/actions).
 
-## Execution on a cluster running in AWS ECS: 
+The Docker file is located at `docker/Dockerfile-wanv2_1`. All suggestions to improve it are welcome: 
+[open a ticket](https://github.com/didier-durand/llms-in-clouds/issues) for yours
+
+For readability purposes, the Docker file copied here:
+
+```
+FROM pytorch/pytorch:2.6.0-cuda12.6-cudnn9-devel
+
+# install tools + libglib2.0-0 & libx11-6 because Gradio needs them on Linux and they are missing in base Nvidia image
+# hadolint ignore=DL3008
+RUN apt-get update  \
+    && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends curl wget git libglib2.0-0 libx11-6 libxrender1 libxtst6 libxi6 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# check & upgrade pip
+RUN python --version \
+    && python -m ensurepip --upgrade \
+    && python -m pip install --upgrade pip
+
+# clone project
+WORKDIR "/home"
+RUN git clone "https://github.com/Wan-Video/Wan2.1.git"
+ARG WAN_DIR="/home/Wan2.1"
+WORKDIR ${WAN_DIR}
+
+# install project requirements + xfuser for multi-GPU support
+RUN python -m pip install --upgrade -r requirements.txt \
+    && python -m pip install --upgrade "xfuser==0.4.1"
+
+# ? used to have a regex which avoids COPY failure in absence of patch file
+ARG PATCH_SHELL="patch-wan-ai-2.1.sh"
+COPY "patch/${PATCH_SHELL}"? "${WAN_DIR}/"
+# hadolint ignore=SC2015
+RUN  test -f  ${PATCH_SHELL} && bash ${PATCH_SHELL} || true
+
+ARG MODEL_DIR="/home/model"
+# model dir must be created at image build time to allow volume bind on container start
+WORKDIR ${MODEL_DIR}
+
+#back to Wan dir as initial working dir for execution
+WORKDIR ${WAN_DIR}
+
+# communication parameters
+ENV HOST="0.0.0.0"
+ENV PORT=7860
+
+# MODEL, LAUNCHER & CKPT_DIR can be ovveriden by in docker run with -e / --env option
+ENV WAN_DIR=${WAN_DIR}
+ENV MODEL="Wan-AI/Wan2.1-T2V-1.3B"
+ENV MODEL_DIR=${MODEL_DIR}
+ENV LAUNCHER="t2v_14B_singleGPU.py"
+ENV CKPT_DIR=${MODEL_DIR}/${MODEL}
+
+EXPOSE ${PORT}
+
+# Wan model needs access to some Mesa libraries, which are not initially included in LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/nvidia/nsight-compute/2024.3.2/host/linux-desktop-glibc_2_11_3-x64/Mesa
+# to try to avoid CUDA out-of-memory errors
+ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+CMD ["bash", "-c", "printenv && cd gradio && python ${LAUNCHER} --ckpt_dir ${CKPT_DIR} || sleep infinity"]
+```
+
+
+## Execution on AWS ECS cluster
 
 When started as an ECS Task in a ECS service, the logs emitted by Wan2.1-T2V-1.3B are the following. 
 When prompt with the prompt described above, the model will do 50 iterations each lasting each approx 53.5s. 
