@@ -23,12 +23,6 @@ WORKDIR ${WAN_DIR}
 RUN python -m pip install --upgrade -r requirements.txt \
     && python -m pip install --upgrade "xfuser==0.4.1"
 
-# ? used to have a regex which avoids COPY failure in absence of patch file
-ARG PATCH_SHELL="patch-wan-ai-2.1.sh"
-COPY "patch/${PATCH_SHELL}"? "${WAN_DIR}/"
-# hadolint ignore=SC2015
-RUN  test -f  ${PATCH_SHELL} && bash ${PATCH_SHELL} || true
-
 ARG MODEL_DIR="/home/model"
 # model dir must be created at image build time to allow volume bind on container start
 WORKDIR ${MODEL_DIR}
