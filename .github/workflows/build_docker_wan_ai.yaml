@@ -54,7 +54,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: 'Build and push image to Docker Hub'
-        if: github.repository == 'didier-durand/llms-in-clouds-private'
+        if: github.repository == 'didier-durand/llms-in-clouds'
         uses: docker/build-push-action@v6
         with:
           push: true
