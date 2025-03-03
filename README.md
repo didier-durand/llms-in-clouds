@@ -4,6 +4,9 @@
     <img src="assets/wan-logo.png" width="200"/>
 <p>
 
+[![docker build Wan AI v2.1](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_wan_ai.yaml/badge.svg)](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_wan_ai.yaml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Sections
 
 * [Wan AI models](#wan-ai-models)
