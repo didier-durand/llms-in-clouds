@@ -91,7 +91,7 @@ directly from GitHub build platform. This script based on standard [GitHub Actio
 The Docker file is located at `docker/Dockerfile-wanv2_1`. All suggestions to improve it are welcome: 
 [open a ticket](https://github.com/didier-durand/llms-in-clouds/issues) for yours! 
 
-You can compare the outcome of your Docker builds with ours by going to the [Actions page of the repo](actions)
+You can compare the outcome of your Docker builds with ours by going to the [Actions page of the repo](actions/)
 
 For readability purposes, the Docker file copied here:
 
