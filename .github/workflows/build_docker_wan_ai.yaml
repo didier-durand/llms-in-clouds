@@ -3,7 +3,7 @@ name: 'docker build Wan AI v2.1'
 on:
   push:
     paths:
-      - '../../docker/Dockerfile-wanv2_1'
+      - 'docker/Dockerfile-wanv2_1'
       - '.github/workflows/build_docker_wan_ai.yaml'
 
 jobs:
