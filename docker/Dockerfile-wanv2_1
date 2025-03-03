@@ -1,6 +1,6 @@
 FROM pytorch/pytorch:2.6.0-cuda12.6-cudnn9-devel
 
-# install tools & libglib2.0-0 & libx11-6 because Gradio needs them on Linux and they are missing in base Nvidia image
+# install tools + libglib2.0-0 & libx11-6 because Gradio needs them on Linux and they are missing in base Nvidia image
 # hadolint ignore=DL3008
 RUN apt-get update  \
     && apt-get upgrade -y \
