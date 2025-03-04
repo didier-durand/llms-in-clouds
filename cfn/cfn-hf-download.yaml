@@ -1,0 +1,213 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'AWS CodePipeline to build download LLM models from HuggingFace site'
+
+Parameters:
+
+  LlmModels:
+    Description: 'default model names'
+    Type: String
+    Default: 'Llama-3.3-70B-Instruct'
+
+  PathToModels:
+    Description: 'default path to models'
+    Type: String
+    Default: 'meta-llama'
+
+  AccessToken:
+    # see https://huggingface.co/docs/hub/en/security-tokens
+    # do not place your value for HF access token here
+    # use SSM Parameter editor in console to input it
+    Description: 'HuggingFace access token'
+    Type: String
+    Default: '<change-this-version-in-SSM-editor>'
+
+  BucketName:
+    Description: 'bucket name for artefacts'
+    Type: String
+    Default: 'aws-qt-didduran-076516228660-us-west-2'
+
+  CodeBuildImage:
+    Description: 'CodeBuild image used in pipeline'
+    Type: String
+    Default: 'aws/codebuild/amazonlinux2-x86_64-standard:5.0'
+
+  ComputeType:
+    Description: 'CodeBuild instance type'
+    Type: String
+    # see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codebuild-project-environment.html#cfn-codebuild-project-environment-type
+    Default: 'BUILD_GENERAL1_XLARGE' # required to download large models and avoid disk space issues
+
+Resources:
+
+  ModelsDownloader:
+    Type: AWS::CodeBuild::Project
+    DeletionPolicy: Delete
+    Properties:
+      Name: !Sub 'hf-model-download-${UnicitySuffix.Value}'
+      Artifacts:
+        Type: 'NO_ARTIFACTS'
+      Environment:
+        ComputeType: !Ref ComputeType
+        PrivilegedMode: 'true'
+        Image: !Ref CodeBuildImage
+        Type: 'LINUX_CONTAINER'
+        EnvironmentVariables:
+          - Name: 'S3_BUCKET'
+            Value: !GetAtt S3BucketForModels.Name
+          - Name: 'S3_PATH'
+            Value: !GetAtt S3PathToModels.Name
+          - Name: 'MODEL_LIST'
+            Value: !GetAtt HfModelsToDownload.Name
+          - Name: 'HF_TOKEN'
+            Value: !GetAtt HfAccessToken.Name
+          - Name: 'HF_TOKEN_DEFAULT'
+            Value: '<do-not-change-this-value>'
+      ServiceRole: !Ref CodeBuildRole
+      ResourceAccessRole: !Ref CodeBuildRole
+      Source:
+        Type: 'NO_SOURCE'
+        BuildSpec: |
+          version: 0.2
+          env: 
+            shell: bash
+          phases:
+            install:
+              commands:
+                - ### check available disk space
+                - df -h
+          
+                - ### install packages
+                - yum update -y
+                - yum install -y jq awscli python3.12
+                - yum clean all
+                - python3.12 -m ensurepip --upgrade
+                - python3.12 -m pip install --upgrade pip
+                - python3.12 -m pip install --upgrade "huggingface_hub[cli,hf_transfer]" hf_transfer
+          
+                # set up environment vars
+                - echo "S3_BUCKET= $S3_BUCKET"
+                - echo "S3_PATH= $S3_PATH"
+                - echo "MODEL_LIST= $MODEL_LIST"
+                - echo "HF_TOKEN= $HF_TOKEN"
+                - echo "HF_TOKEN_DEFAULT= $HF_TOKEN_DEFAULT"
+                - aws ssm get-parameter --name $S3_BUCKET
+                - aws ssm get-parameter --name $S3_PATH
+                - aws ssm get-parameter --name $MODEL_LIST
+                - export S3_BUCKET=$(aws ssm get-parameter --name $S3_BUCKET | jq --raw-output '.Parameter.Value')
+                - export S3_PATH=$(aws ssm get-parameter --name $S3_PATH | jq --raw-output '.Parameter.Value')
+                - export MODEL_LIST=$(aws ssm get-parameter --name $MODEL_LIST | jq --raw-output '.Parameter.Value')
+                - export HF_TOKEN=$(aws ssm get-parameter --name $HF_TOKEN | jq --raw-output '.Parameter.Value')
+                - echo "S3_BUCKET= $S3_BUCKET"
+                - echo "S3_PATH= $S3_PATH"
+                - echo "MODEL_LIST= $MODEL_LIST"
+                - |
+                  if [[ $HF_TOKEN == "$HF_TOKEN_DEFAULT" ]]
+                  then
+                    echo "no HF access token override defined in SSM"
+                    HF_TOKEN=''
+                  else
+                    echo "HF_TOKEN: $(echo $HF_TOKEN | cut -c1-7)<HIDDEN>"
+                  fi
+                      
+              
+                - # required by HF for large-scale and high-speed transfers
+                - export HF_HUB_ENABLE_HF_TRANSFER=1
+            build:
+              commands:
+                - echo "current dir= $(pwd)"
+                - mkdir "$S3_PATH"
+                - ls -lh "$S3_PATH"
+                - |
+                  for MODEL in $(echo $MODEL_LIST | tr "," "\n")
+                  do
+                     echo "MODEL= $MODEL"
+                     rm -rf $S3_PATH/$MODEL
+                     mkdir -p $S3_PATH/$MODEL
+                     if [[ $HF_TOKEN == '' ]];
+                     then
+                        huggingface-cli login --token $HF_TOKEN --add-to-git-credential
+                     fi
+                     huggingface-cli download --local-dir $S3_PATH/$MODEL $S3_PATH/$MODEL
+                     aws s3 rm --quiet --recursive s3://$S3_BUCKET/$S3_PATH/$MODEL
+                     aws s3 cp --quiet --recursive $S3_PATH/$MODEL s3://$S3_BUCKET/$S3_PATH/$MODEL
+                  done
+            post_build:
+              commands:
+                - ls -lh -R "$S3_PATH"
+      TimeoutInMinutes: 120
+      Tags:
+        - Key: 'Name'
+          Value: !Sub 'stack ${AWS::StackName}-${UnicitySuffix.Value}'
+
+  CodeBuildRole:
+    # see https://docs.aws.amazon.com/codebuild/latest/userguide/setting-up-service-role.html
+    Type: AWS::IAM::Role
+    DeletionPolicy: Delete
+    Properties:
+      RoleName: !Sub 'codebuild-role-hf-download-${UnicitySuffix.Value}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: 'Allow'
+            Principal:
+              Service:
+                - 'codebuild.amazonaws.com'
+      Policies:
+        - PolicyName: !Sub 'codebuild-policy-hf-download-${UnicitySuffix.Value}'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action: 's3:*'
+                Effect: 'Allow'
+                Resource: '*'
+              - Action: 'ssm:*'
+                Effect: 'Allow'
+                Resource: '*'
+              - Action: 'logs:*'
+                Effect: 'Allow'
+                Resource: '*'
+
+  HfModelsToDownload:
+    Type: AWS::SSM::Parameter
+    DeletionPolicy: Delete
+    Properties:
+      Type: 'String'
+      Name: !Sub 'hf-models-list-${UnicitySuffix.Value}'
+      Value: !Ref LlmModels
+
+  HfAccessToken:
+    Type: AWS::SSM::Parameter
+    DeletionPolicy: Delete
+    Properties:
+      Type: 'String'
+      Name: !Sub 'hf-access-token-${UnicitySuffix.Value}'
+      Value: !Ref AccessToken
+
+  S3BucketForModels:
+    Type: AWS::SSM::Parameter
+    DeletionPolicy: Delete
+    Properties:
+      Type: 'String'
+      Name: !Sub 'hf-models-bucket-${UnicitySuffix.Value}'
+      Value: !Ref BucketName
+
+  S3PathToModels:
+    Type: AWS::SSM::Parameter
+    DeletionPolicy: Delete
+    Properties:
+      Type: 'String'
+      Name: !Sub 'hf-models-path-${UnicitySuffix.Value}'
+      Value: !Ref PathToModels
+
+  UnicitySuffix:
+    Type: AWS::SSM::Parameter
+    DeletionPolicy: Delete
+    Properties:
+      Type: 'String'
+      Name: !Join
+         - '-'
+         - - 'hf-download-unicity-suffix-hf-download'
+           - !Select [ 0, !Split [ '-', !Select [ 2, !Split [ /, !Ref AWS::StackId ] ] ] ]
+      Value: !Select [ 0, !Split [ '-', !Select [ 2, !Split [ /, !Ref AWS::StackId ] ] ] ]

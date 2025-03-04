@@ -1,0 +1,34 @@
+name: 'cfn-lint template'
+
+on:
+  push:
+    paths:
+      - 'cfn/*'
+      - '.github/workflows/lint_cfn.yaml'
+
+jobs:
+
+  lint_CFN_template:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'checkout git code'
+        uses: actions/checkout@v4
+      - name: 'list changed files'
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+      - name: 'lint CFN template'
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          pip install cfn-lint
+          echo "ALL_CHANGED_FILES: $ALL_CHANGED_FILES"
+          for FILE in ${ALL_CHANGED_FILES}
+          do
+            if [[ $FILE == 'cfn/'* ]]
+            then
+              echo "linting CFN template: $FILE"
+              cfn-lint --info "$FILE"
+            else
+              echo "not a CFN template to lint $FILE"
+            fi
+          done
