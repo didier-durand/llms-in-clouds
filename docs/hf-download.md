@@ -33,7 +33,7 @@ we define the target bucket, target path and LLM model list as AWS Systems Manag
 updated via the AWS console by SSM-authorized users with no need for them to have credentials on the CFN stack or on 
 the CodeBuild project (except right to launch it)
 
-We also support the HuggingFace access token, as an optional SSM Parameter. It may be required to authenticate to WF 
+We also support the HuggingFace access token, as an optional SSM Parameter. It may be required to authenticate to HF 
 when the license of a given model requires some pre-download agreement on the HuggingFace web site.
 
 *Note*: if you wonder what the UnicitySuffix parameter is used for. It extracts a chunk of the unique CFN stack UUID. 
@@ -55,8 +55,9 @@ the download and save it.
 *Notes:* 
 
 1. the IAM CodeBuild execution role limits the authorization of the Codebuild project. It can only execute CloudWatch logs, SSM and S3 commands 
-to log activity, access SSM parameters and save models in the S3 bucket. We defined actions as 's3:\*' on resource '\*'. If your environment requires it, you can 
-further tighten credentials by restricting the resources to the specific log streams, parameters and bucket in use.
+to log activity, access SSM parameters and save models in the S3 bucket. We defined actions as 'logs:\*','s3:\*' and 'ssm:\*' on resource 
+'\*'. If your environment requires it, you can further tighten credentials by restricting the resources to the specific log streams, 
+parameters and bucket in use.
 2. On the cost efficiency side, CodeBuild pricing is charged with the [pay-as-you-go model](https://aws.amazon.com/codebuild/pricing/): **There are no upfront costs or minimum fees. You pay 
 only for the resources you use. You are charged for compute resources based on the duration it takes your build to 
 run. The rate depends on the selected compute type.** So, the CodeBuild project in the CFN template won't cost you if you don't use it. Same 
