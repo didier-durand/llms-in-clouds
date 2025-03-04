@@ -1,6 +1,6 @@
 ## Efficiently download and store multiple large models (LLMs) from HuggingFace to S3
 
-### Sections
+### Sections 
 
 * [Rationale](#rationale)
 * [Usage](#usage)
