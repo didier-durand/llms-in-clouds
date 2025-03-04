@@ -1,6 +1,8 @@
 ## Efficiently download and store multiple large models (LLMs) from HuggingFace to S3
 
-### Sections 
+[![cfn-lint template](https://github.com/didier-durand/llms-in-clouds/actions/workflows/lint_cfn.yaml/badge.svg)](https://github.com/didier-durand/llms-in-clouds/actions/workflows/lint_cfn.yaml)
+
+### Sections
 
 * [Rationale](#rationale)
 * [Usage](#usage)
