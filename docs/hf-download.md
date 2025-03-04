@@ -14,7 +14,7 @@ Providers of LLM models tend to release them in families of multiple members. Qu
 of those members to select the right one with the right compromise between latency and quality for the responses. 
 Additionally, those models tend to be large: 50GB+ is not at all uncommon for high-end models. So, you cannot download them 
 on-the-fly each time from HuggingFace (HF) for obvious reasons (cost, latency, security, etc.). 
-This simple CloudFormation (CFN) template allows to create a mechanism running on AWS cloud to download LLM models from 
+This simple CloudFormation (CFN) template [cfn-hf-download.yaml](../cfn/cfn-hf-download.yaml) allows to create a mechanism running on AWS cloud to download LLM models from 
 HuggingFace (HF) site and store them in S3 for re-use.  The created CFN stack mainly consists of an AWS CodeBuild project 
 that can be triggered from the AWS console whenever a new model needs to be downloaded. 
 
