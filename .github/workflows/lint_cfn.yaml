@@ -3,8 +3,8 @@ name: 'cfn-lint template'
 on:
   push:
     paths:
-      - 'cfn/*'
-      - '.github/workflows/lint_cfn.yaml'
+      - cfn/**
+      - .github/workflows/lint_cfn.yaml
 
 jobs:
 
