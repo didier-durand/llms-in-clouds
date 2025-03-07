@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'docker/Dockerfile-al2023-sglang'
+      - 'extend/customize_sglang.sh'
+      - 'extend/start_sglang.sh'
       - '.github/workflows/build_docker_al2023_sglang.yaml'
 
 jobs:
