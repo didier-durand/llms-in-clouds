@@ -4,7 +4,7 @@ import time
 import openai
 from openai.types.chat.chat_completion import Choice
 
-BACKEND_DNS = "<put the DNS of your AWS ALB own here>"
+BACKEND_DNS = "<put the DNS of your AWS ALB here>"
 BACKEND_URL = f"http://{BACKEND_DNS}:30000/v1" # noqa
 
 class TestQwB32B(unittest.TestCase):
