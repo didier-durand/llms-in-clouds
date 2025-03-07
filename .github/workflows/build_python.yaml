@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/build_python.yaml'
       - 'requirements.txt'
+      -  'pylint.config'
       - 'src/**'
       - 'test/**'
 
