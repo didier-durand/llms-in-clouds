@@ -1,0 +1,70 @@
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023
+
+# to extend / customize SGLang at build time
+ARG CUSTOMIZE_SGLANG="customize_sglang.sh"
+# to extend / customize SGLang launch steps and parameters
+ARG START_SGLANG="start_sglang.sh"
+# model dir must be created at image build time to allow volume bind on container start
+ARG SGL_MODEL_DIR="/home/model"
+# to create directory for accessing model weights via local storage (Docker volume)
+WORKDIR ${SGL_MODEL_DIR}
+# to create directory for SGLang extensions
+WORKDIR "/home/sglang"
+
+# versions of components
+ARG CUDA_VERSION="124"
+ARG PYTHON_VERSION="3.12"
+ARG TORCH_VERSION="2.5"
+ARG SGL_VERSION="0.4.3.post4"
+
+ARG SGL_LINKS="https://flashinfer.ai/whl/cu${CUDA_VERSION}/torch${TORCH_VERSION}/flashinfer-python"
+ARG SGLANG_TP_SIZE=2
+
+ARG SGL_HOST="0.0.0.0"
+ARG SGL_PORT=30000
+
+ # debug, info, warning, error
+ARG SGL_LOG_LEVEL="info"
+
+# install tools
+RUN yum update -y \
+    && yum install -y awscli wget findutils which grep sed git patch \
+    && yum install -y kernel-headers kernel-devel python${PYTHON_VERSION}-devel \
+    && yum clean all
+
+# install Python & sglang
+RUN yum install -y python${PYTHON_VERSION} \
+    && yum clean all  \
+    && python${PYTHON_VERSION} -m ensurepip --upgrade \
+    && python${PYTHON_VERSION} -m pip install --upgrade pip  \
+    && python${PYTHON_VERSION} -m pip install --upgrade --no-cache-dir "sglang[all]==${SGL_VERSION}" --find-links ${SGL_LINKS}
+
+# to be able to know the build versions at runtime
+RUN echo "cuda version: ${CUDA_VERSION}" >> sglang_versions.txt \
+    && echo "python version: ${PYTHON_VERSION}" >> sglang_versions.txt \
+    && echo "torch version: ${TORCH_VERSION}" >> sglang_versions.txt \
+    && echo "sglang version: ${SGL_VERSION}" >> sglang_versions.txt
+
+COPY "extend/"${CUSTOMIZE_SGLANG} ${CUSTOMIZE_SGLANG}
+COPY "extend/"${START_SGLANG} ${START_SGLANG}
+RUN ls -lh \
+    && bash ${CUSTOMIZE_SGLANG}
+
+# turn needed build args into runtime env vars
+# set up python version
+ENV PYTHON_VERSION=${PYTHON_VERSION}
+# communication parameters
+ENV SGL_PORT=${SGL_PORT}
+ENV SGL_HOST=${SGL_HOST}
+# SGLang parameters
+ENV SGL_TP_SIZE=${SGL_TP_SIZE}
+ENV SGL_LOG_LEVEL=${SGL_LOG_LEVEL}
+ENV SGL_PARAMS=""
+# model info
+ENV SGL_MODEL=""
+ENV SGL_MODEL_DIR=${SGL_MODEL_DIR}
+
+EXPOSE ${SGL_PORT}
+
+# CMD ["bash", "-c", "printenv && python${PYTHON_VERSION} -m sglang.launch_server --model ${MODEL} --model-path ${MODEL_DIR}/${MODEL} --host ${HOST} --port ${PORT} --log-level $LOG_LEVEL --enable-metrics --trust-remote-code --tensor-parallel-size $SGLANG_TP_SIZE --enable-p2p-check --disable-cuda-graph || sleep infinity"]
+CMD ["bash", "-c", "bash start_sglang.sh || sleep infinity"]
