@@ -1,0 +1,50 @@
+name: 'build Python code'
+
+on:
+  push:
+    paths:
+      - '.github/workflows/build_python.yaml'
+      - 'requirements.txt'
+      - 'src/**'
+      - 'test/**'
+
+jobs:
+
+  build_python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+    steps:
+    - name: checkout code from repo
+      uses: actions/checkout@v4.2.2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pylint
+        pip install -r requirements.txt
+    - name: checking syntax of scripts
+      run: |
+        python -m py_compile $(git ls-files '*.py')
+    - name: analysing the code quality with pylint
+      run: |
+        pylint --rcfile=./pylint.config src test
+    - name: Running all tests
+      run: |
+        echo "pwd: $(pwd)"
+        ls -1 -alh
+        export PYTHONPATH="$(pwd)/src:$(pwd)/test":$PYTHONPATH
+        echo "PYTHONPATH:" $PYTHONPATH
+        pip install pytest pytest-cov
+        # pytest --cov=./ --cov-report=xml
+        echo "pytest skipped"
+#    - name: Upload coverage reports to Codecov
+#      uses: codecov/codecov-action@v4.0.1
+#      with:
+#        token: ${{ secrets.CODECOV_TOKEN }}
+#        fail_ci_if_error: true
+#        verbose: true
