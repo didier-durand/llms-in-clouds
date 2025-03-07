@@ -10,7 +10,7 @@ on:
 
 jobs:
 
-  build_docker_wan_v2_1:
+  build_docker_al2023_sglang:
     runs-on: ubuntu-latest
 
     env:
