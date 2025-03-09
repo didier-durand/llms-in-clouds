@@ -122,7 +122,7 @@ some http timeout parameter in the source code via ` sed 's/timeout_keep_alive=5
 for file for ` FILE='/usr/local/lib/python3.12/site-packages/sglang/srt/entrypoints/http_server.py`. You can add your own 
 customizations in this shell. 
 * We also copy into the image a start_sglang.sh to dynamically build the start SGLang command from env variables received 
-from the `docker run` command. Different models have different requirements for the [various parameters proposed by SGLang](). 
+from the `docker run` command. Different models have different requirements for the [various parameters proposed by SGLang](https://docs.sglang.ai/backend/server_arguments.html). 
 It allows to keep the launch parameters external to the image: the same Docker image can be used for multiple LLMs.
 * It is unsustainable to include the weights of the LLM into the image: they are most often too big (60B+ for QwQ-32B 
 for example) and they would tie the image to a specific LLM. The latency of a live fetch is too long for live pull 
