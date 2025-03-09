@@ -4,7 +4,7 @@ import time
 import openai
 from openai.types.chat.chat_completion import Choice
 
-BACKEND_DNS = "<put the DNS of your AWS ALB here>"
+BACKEND_DNS = "<put you own back-end DNS name here>"
 BACKEND_URL = f"http://{BACKEND_DNS}:30000/v1" # noqa
 
 class TestQwB32B(unittest.TestCase):
@@ -64,8 +64,8 @@ class TestQwB32B(unittest.TestCase):
 
 
     def test_reasoning_0(self):
-        _ , _, response = self.prompt_qwq_32b("How many letters R in word 'strawberry' ? (please, be succinct on your reasoning "
-                                              "in the answer)")
+        _ , _, response = self.prompt_qwq_32b("How many letters R in word 'strawberry' ? (please, be succinct on "
+                                              "your reasoning in the answer)")
         self.assertGreater(len(response),0)
 
     def test_logical_reasoning_1(self):
@@ -97,4 +97,22 @@ class TestQwB32B(unittest.TestCase):
         """
         _ , _, response = self.prompt_qwq_32b("Susan and Lisa decided to play tennis against each other. They bet $1 on each game "
                                               "they played. Susan won three bets and Lisa won $5. How many games did they play?")
+        self.assertGreater(len(response), 0)
+
+
+    def test_mathematical_reasoning_4(self):
+
+        """
+        Mrs Mess comes away better off than she should, by $20 in fact. Despite the warning in the title, Mrs Mess did pay less than she should have done!
+        Cost of furniture: $70
+        Mrs Mess paid: $100 x 2 = $200
+        Change received: $50 x 3 = $150
+        Net payment: $200 - $150 = $50
+        Profit for Mrs Mess: $70 - $50 = $20
+        """
+        _ , _, response = self.prompt_qwq_32b("Mrs Mess was buying a set of garden furniture. The bill was seventy dollars."
+                                              "She gave the attendant what she thought were two $50 notes, (actually two $100 "
+                                              "notes).The attendant was sleepy and didn't notice either, so he gave Mrs Mess what"
+                                              " he thought were three $10 notes (actually three $50 notes).Who ended up better "
+                                              "off than they should?")
         self.assertGreater(len(response), 0)
