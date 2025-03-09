@@ -7,6 +7,7 @@ on:
       - 'extend/customize_sglang.sh'
       - 'extend/start_sglang.sh'
       - '.github/workflows/build_docker_al2023_sglang.yaml'
+      - '.hadolint.yaml'
 
 jobs:
 
@@ -15,7 +16,7 @@ jobs:
 
     env:
       DOCKER_FILE: 'docker/Dockerfile-al2023-sglang'
-      IMG_TAG: 'didierdurand/al2023-sglang:latest'
+      IMG_TAG: 'didierdurand/lic-sglang:al2023-latest'
 
     steps:
 
