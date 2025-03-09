@@ -85,7 +85,7 @@ and dynamically change its configuration.
 If you are not interested in building the model by yourself, we provide a pre-built 
 image with named `didierdurand/lic-wan-ai` (for your pulls). Details on Docker hub at [https://hub.docker.com/repository/docker/didierdurand/lic-wan-ai/general](https://hub.docker.com/repository/docker/didierdurand/lic-wan-ai/general) 
 on Docker Hub. You can also easily build your own customized image by forking this repo and adapt the Dockerfile to your needs and 
-build it via the [provided yaml script](.github/workflows/[build_docker_wan_ai.yaml) building the image and pushing it to Docker Hub 
+build it via the [provided yaml script](../.github/workflows/build_docker_wan_ai.yaml) building the image and pushing it to Docker Hub 
 directly from GitHub build platform. This script based on standard [GitHub Actions](https://docs.github.com/en/actions).
 
 The Docker file is located at `docker/Dockerfile-wanv2_1`. All suggestions to improve it are welcome: 
