@@ -1,0 +1,78 @@
+FROM ubuntu:25.04
+
+# to extend / customize SGLang at build time
+ARG CUSTOMIZE_SGLANG="customize_sglang.sh"
+# to extend / customize SGLang launch steps and parameters
+ARG START_SGLANG="start_sglang.sh"
+# model dir must be created at image build time to allow volume bind mounts on container start
+ARG SGL_MODEL_DIR="/home/model"
+# to create directory for accessing model weights via local storage (Docker volume)
+WORKDIR ${SGL_MODEL_DIR}
+# to create directory for SGLang extensions
+WORKDIR "/home/sglang"
+
+# versions of components
+ARG CUDA_VERSION="124"
+ARG PYTHON_VERSION="3.12"
+ARG TORCH_VERSION="2.5"
+ARG SGL_VERSION="0.4.3.post4"
+
+ARG SGL_LINKS="https://flashinfer.ai/whl/cu${CUDA_VERSION}/torch${TORCH_VERSION}/flashinfer-python"
+ARG SGLANG_TP_SIZE=2
+
+ARG SGL_HOST="0.0.0.0"
+ARG SGL_PORT=30000
+
+ # debug, info, warning, error
+ARG SGL_LOG_LEVEL="info"
+
+# install headers, tools & utilities
+# hadolint ignore=DL3008
+RUN apt-get update -y \
+    && apt-get upgrade -y  \
+    && apt-get install -y --no-install-recommends curl wget findutils which grep sed git patch \
+    && apt-get install -y --no-install-recommends linux-headers-generic \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# install Python & sglang
+# hadolint ignore=DL3008
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends python${PYTHON_VERSION} python3-pip python${PYTHON_VERSION}-dev  \
+    && python${PYTHON_VERSION} -m pip install --break --upgrade --no-cache-dir "sglang[all]==${SGL_VERSION}" --find-links ${SGL_LINKS} \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# to be able to know the build versions at runtime
+RUN echo "cuda version: ${CUDA_VERSION}" >> sglang_versions.txt \
+    && echo "python version: ${PYTHON_VERSION}" >> sglang_versions.txt \
+    && echo "torch version: ${TORCH_VERSION}" >> sglang_versions.txt \
+    && echo "sglang version: ${SGL_VERSION}" >> sglang_versions.txt
+
+COPY "extend/"${CUSTOMIZE_SGLANG} ${CUSTOMIZE_SGLANG}
+COPY "extend/"${START_SGLANG} ${START_SGLANG}
+RUN ls -lh
+    # && bash ${CUSTOMIZE_SGLANG}
+
+# turn needed build args into runtime env vars
+# set up python version
+ENV PYTHON_VERSION=${PYTHON_VERSION}
+# communication parameters
+ENV SGL_PORT=${SGL_PORT}
+ENV SGL_HOST=${SGL_HOST}
+# SGLang parameters
+ENV SGL_TP_SIZE=${SGL_TP_SIZE}
+ENV SGL_LOG_LEVEL=${SGL_LOG_LEVEL}
+ENV SGL_PARAMS=""
+# model info
+ENV SGL_MODEL=""
+ENV SGL_MODEL_DIR=${SGL_MODEL_DIR}
+
+EXPOSE ${SGL_PORT}
+
+# to try to avoid CUDA out-of-memory errors.
+# see https://pytorch.org/docs/stable/notes/cuda.html
+# also https://iamholumeedey007.medium.com/memory-management-using-pytorch-cuda-alloc-conf-dabe7adec130
+ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+CMD ["bash", "-c", "bash start_sglang.sh || sleep infinity"]
