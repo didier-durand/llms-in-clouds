@@ -6,8 +6,10 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![build Python code](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_python.yaml/badge.svg)](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_python.yaml)
+[![docker build ubuntu2504 sglang](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_ubuntu2504_sglang.yaml/badge.svg)](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_ubuntu2504_sglang.yaml)
+[![docker build redhat9 sgLang](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_redhat9_sglang.yaml/badge.svg)](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_redhat9_sglang.yaml)
+[![docker build al2023 sglang](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_al2023_sglang.yaml/badge.svg)](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_al2023_sglang.yaml)
 [![docker build Wan AI v2.1](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_wan_ai.yaml/badge.svg)](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_wan_ai.yaml)
-[![docker build SGLang](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_al2023_sglang.yaml/badge.svg)](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_al2023_sglang.yaml)
 [![cfn-lint template](https://github.com/didier-durand/llms-in-clouds/actions/workflows/lint_cfn.yaml/badge.svg)](https://github.com/didier-durand/llms-in-clouds/actions/workflows/lint_cfn.yaml)
 
 ### Preamble
