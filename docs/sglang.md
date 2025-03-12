@@ -108,12 +108,22 @@ computing demand for compute capacity by Generative AI!
 
 ## Docker image structure
 
-We thoroughly use this image based on [our Dockerfile](../docker/Dockerfile-al2023-sglang) on AWS Elastic Container Service (ECS) for multiple models that 
-SGLang support. It can also be used on any local host system or laptop equipped with some Nvidia GPU(s).
+We thoroughly use this image based on [our Dockerfile Dockerfile-al2023-sglang](../docker/Dockerfile-al2023-sglang) (based on Amazon Linux 2023) on AWS 
+Elastic Container Service (ECS) for multiple models that SGLang supports. It can also be used on 
+any local host system or laptop equipped with some Nvidia GPU(s).
 
-If you don’t want to build the image yourself, you can pull it for direct execution from our Docker hub repository: `docker pull didierdurand/lic-sglang:amzn2023-latest`
-The image that we publish is built directly on GitHub via this [GitHub Action](../.github/workflows/build_docker_al2023_sglang.yaml). 
-You can see corresponding executions on [this page](https://github.com/didier-durand/llms-in-clouds/actions)
+If you don’t want to build the image yourself, you can pull it for direct execution from our 
+[Docker Hub repository](https://hub.docker.com/repository/docker/didierdurand/lic-sglang/general): 
+`docker pull didierdurand/lic-sglang:amzn2023-latest`. The image that we publish is built directly on 
+GitHub and pushed to Docker Hub via this [GitHub Action](../.github/workflows/build_docker_al2023_sglang.yaml). You can see corresponding executions 
+on [this page](https://github.com/didier-durand/llms-in-clouds/actions)
+
+We also provide 2 additional Docker build files with their corresponding pre-built images that you 
+can pull directly from our [Docker Hub repository](https://hub.docker.com/repository/docker/didierdurand/lic-sglang/general):
+* Ubuntu 25.04 (Plucky Puffin): [Dockerfile-ubuntu2504-sglang](../docker/Dockerfile-ubuntu2504-sglang)
+that can be pulled directly with `docker pull didierdurand/lic-sglang:ubuntu2504-latest`
+* Redhat 9 25.04: [Dockerfile-redhat9-sglang](../docker/Dockerfile-redhat9-sglang)
+that can be pulled directly with `docker pull didierdurand/lic-sglang:redhat9-latest`
 
 *Key aspects*:
 
@@ -136,7 +146,7 @@ variables will be populated via `--env` option. ([doc for details](https://docs.
 *  the final `|| sleep infinity` is a trick to keep the container up & running even if the SGLang start command fails for any reason. 
 It allows to connect to the container via `docker exect -it <container-id> /bin/bash` to debug the problem.
 
-A copy of the Dockerfile is included here for readability purposes:
+A copy of the Dockerfile for Amazon Linux 2023 is included here for readability purposes:
 
 ```
 FROM public.ecr.aws/amazonlinux/amazonlinux:2023
@@ -167,16 +177,16 @@ ARG SGL_PORT=30000
  # debug, info, warning, error
 ARG SGL_LOG_LEVEL="info"
 
-# install tools
+# install headers, tools & utilities
 RUN yum update -y \
     && yum install -y awscli wget findutils which grep sed git patch \
-    && yum install -y kernel-headers kernel-devel python${PYTHON_VERSION}-devel \
+    && yum install -y kernel-headers \
     && yum clean all
 
 # install Python & sglang
-RUN yum install -y python${PYTHON_VERSION} \
+RUN yum install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-devel \
     && yum clean all  \
-    && python${PYTHON_VERSION} -m ensurepip --upgrade \
+    && python${PYTHON_VERSION} -m ensurepip \
     && python${PYTHON_VERSION} -m pip install --upgrade pip  \
     && python${PYTHON_VERSION} -m pip install --upgrade --no-cache-dir "sglang[all]==${SGL_VERSION}" --find-links ${SGL_LINKS}
 
@@ -206,6 +216,11 @@ ENV SGL_MODEL=""
 ENV SGL_MODEL_DIR=${SGL_MODEL_DIR}
 
 EXPOSE ${SGL_PORT}
+
+# to try to avoid CUDA out-of-memory errors.
+# see https://pytorch.org/docs/stable/notes/cuda.html
+# also https://iamholumeedey007.medium.com/memory-management-using-pytorch-cuda-alloc-conf-dabe7adec130
+ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 CMD ["bash", "-c", "bash start_sglang.sh || sleep infinity"]
 ```
