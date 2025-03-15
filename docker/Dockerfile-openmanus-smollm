@@ -1,0 +1,64 @@
+# see https://github.com/didier-durand/llms-in-clouds/blob/main/docs/openmanus-smollm.md for more info
+
+# to build locally
+# docker build -t openmanus-smollm:latest -f docker/Dockerfile-openmanus-smollm .
+
+# to run
+# docker pull didierduran/openmanus-smollm:latest
+# docker run -d -p 11434:11434 --name openmanus-smollm openmanus-smollm:latest
+
+# to try from host machine
+# docker exec -it openmanus-smollm python3.12 main.py
+
+FROM ubuntu:25.04
+
+ARG OLLAMA_MODEL="smollm2:1.7b"
+# var name cannot changed: used by ollama. Created to allow bind mounts (with model on host system) with docker run.
+ARG OLLAMA_MODELS="/home/ollama-models"
+ARG OLLAMA_PORT=11434
+
+ARG OPENMANUS_REPO="https://github.com/mannaandpoem/OpenManus.git"
+ARG OPENMANUS_CONFIG="extend/config.openmanus-ollama.toml"
+ARG OPENMANUS_CUSTO="customize_openmanus.sh"
+ARG OPENMANUS_DIR="/home/OpenManus"
+
+ARG PYTHON_VERSION="3.12"
+
+# install headers, tools & utilities + PYthon
+# hadolint ignore=DL3008
+RUN apt-get update -y \
+    && apt-get upgrade -y  \
+    && apt-get install -y --no-install-recommends curl wget findutils which grep sed git patch \
+    && apt-get install -y --no-install-recommends python${PYTHON_VERSION} python3-pip python${PYTHON_VERSION}-dev  \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# to create dir for models
+WORKDIR ${OLLAMA_MODELS}
+# hadolint ignore=DL4006
+RUN curl -fsSL https://ollama.com/install.sh | sh
+# pull model in ${OLLAMA_MODELS}
+# hadolint ignore=DL3001
+RUN ollama serve & SERVER=$! ; sleep 5 ; ollama pull ${OLLAMA_MODEL} ; ollama list ; ollama show ${OLLAMA_MODEL} ; kill ${SERVER}
+
+WORKDIR "/home"
+RUN git clone ${OPENMANUS_REPO}
+
+WORKDIR ${OPENMANUS_DIR}
+
+COPY "extend/"${OPENMANUS_CUSTO} ${OPENMANUS_CUSTO}
+RUN bash ${OPENMANUS_CUSTO}
+COPY ${OPENMANUS_CONFIG} "config/config.toml"
+
+RUN python${PYTHON_VERSION} -m pip install --break --upgrade --no-cache-dir -r requirements.txt
+
+# turn ollama build args into runtime env vars
+ENV OLLAMA_MODEL=${OLLAMA_MODEL}
+ENV OLLAMA_MODELS=${OLLAMA_MODELS}
+ENV OLLAMA_PORT=${OLLAMA_PORT}
+ENV OLLAMA_HOST="0.0.0.0:"${OLLAMA_PORT}
+
+# expose Ollama via its standard port 11434
+EXPOSE ${OLLAMA_PORT}
+
+CMD ["bash", "-c",  "printenv && ollama serve && sleep 5 && ollama run ${OLLAMA_MODEL} || sleep infinity"]

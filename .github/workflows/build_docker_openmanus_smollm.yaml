@@ -1,0 +1,65 @@
+name: 'docker build openmanus with smollm'
+
+on:
+  push:
+    paths:
+      - 'docker/Dockerfile-openmanus-smollm'
+      - 'extend/customize_openmanus.sh'
+      - '.github/workflows/build_docker_openmanus_smollm.yaml'
+      - '.hadolint.yaml'
+
+jobs:
+
+  build_docker_openmanus_smollm:
+    runs-on: ubuntu-latest
+
+    env:
+      DOCKER_FILE: 'docker/Dockerfile-openmanus-smollm'
+      IMG_TAG: 'didierdurand/openmanus-smollm:latest'
+
+    steps:
+
+      - name: 'gain some disk space for build of large images'
+        run: |
+          # see https://github.com/apache/flink/blob/02d30ace69dc18555a5085eccf70ee884e73a16e/tools/azure-pipelines/free_disk_space.sh
+          echo "Freeing up disk space on CI system"
+          echo "Listing 100 largest packages"
+          dpkg-query -Wf '${Installed-Size}\t${Package}\n' | sort -n | tail -n 100
+          df -h
+          echo "Removing large packages"
+          sudo apt-get remove -y '^dotnet-.*'
+          sudo apt-get remove -y '^llvm-.*'
+          sudo apt-get remove -y 'php.*'
+          sudo apt-get remove -y azure-cli google-cloud-sdk google-chrome-stable firefox powershell mono-devel
+          sudo apt-get autoremove -y
+          sudo apt-get clean
+          df -h
+          echo "Removing large directories"
+          rm -rf /usr/share/dotnet/
+          df -h
+
+      - name: 'checkout git code'
+        uses: actions/checkout@v4
+
+      - name: 'log in to Docker Hub'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: 'lint docker file'
+        # see https://github.com/hadolint/hadolint
+        run: |
+          # https://github.com/hadolint/hadolint
+          docker run --rm -i -v ${PWD}/.hadolint.yaml:/.config/hadolint.yaml hadolint/hadolint < ${{env.DOCKER_FILE}}
+
+      - name: 'set up Docker Buildx'
+        uses: docker/setup-buildx-action@v3
+
+      - name: 'build and push image to Docker Hub'
+        if: github.repository == 'didier-durand/llms-in-clouds'
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          file: ${{env.DOCKER_FILE}}
+          tags: ${{env.IMG_TAG}}
