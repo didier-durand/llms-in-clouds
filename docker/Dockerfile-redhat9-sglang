@@ -70,7 +70,7 @@ ENV SGL_MODEL_DIR=${SGL_MODEL_DIR}
 
 EXPOSE ${SGL_PORT}
 
-# to try to avoid CUDA out-of-memory errors.
+# trying to avoid CUDA out-of-memory errors.
 # see https://pytorch.org/docs/stable/notes/cuda.html
 # also https://iamholumeedey007.medium.com/memory-management-using-pytorch-cuda-alloc-conf-dabe7adec130
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
