@@ -62,4 +62,4 @@ jobs:
         with:
           push: true
           file: ${{env.DOCKER_FILE}}
-          tags: ${{env.IMG_TAG}}
+          tags: ${{env.IMG_TAGS}}
