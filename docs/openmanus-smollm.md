@@ -6,7 +6,7 @@
 4. [Container start](#container-start-)
 5. [Direct inference with SmolLM](#direct-inference-with-smollm-)
 
-### OpenManus and SmolLm as autonomous AI agent
+### OpenManus and SmolLM as autonomous AI agent
 
 ![OpenManus & SmolLM](../assets/openmanus-smollm.png)
 
