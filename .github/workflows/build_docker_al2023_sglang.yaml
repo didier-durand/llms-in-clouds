@@ -16,7 +16,7 @@ jobs:
 
     env:
       DOCKER_FILE: 'docker/Dockerfile-al2023-sglang'
-      IMG_TAG: 'didierdurand/lic-sglang:al2023-latest'
+      IMG_TAG: 'didierdurand/lic-sglang:al2023-0.4.2.post4'
 
     steps:
 
