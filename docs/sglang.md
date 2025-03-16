@@ -13,6 +13,10 @@
 3. [SGLang start sequence with Qwen QwQ-32B](#sglang-start-sequence-with-qwen-qwq-32b)
 4. [Inference examples with reasoning of QwQ-32B](#inference-examples-with-reasoning-by-qwen-qwq-32b)
 
+### Updates
+
+* March 16th, 2025: Docker images on [Docker Hub](https://hub.docker.com/repository/docker/didierdurand/lic-sglang/general) and Docker build files in directory [docker](../docker) updated to SGLang v0.4.4.post1
+
 ### SGLang architecture architecture and features
 
 ![SGLang Architecture](../assets/sglang-architecture.png)
