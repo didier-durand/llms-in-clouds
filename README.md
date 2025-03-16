@@ -25,12 +25,15 @@ its content. Thank you!
 
 ### Experiments and tools
 
-1. **[SGLang on ECS: efficiently serving leading OSS LLMs](docs/sglang.md)** (March 2025): experiment and Docker image (get it with `docker pull didierdurand/lic-sglang:al2023-latest`) 
+
+1. **[OpenManus & SmolLM as autonomous AI agent](docs/openmanus-smollm.md)** (March 2025): experiment and Docker image (get it with `docker pull didierdurand/openmanus-smollm:latest`) 
+to create an autonomous AI agent by integrating OpenManus and HuggingFace's SmolLM (served by Ollama) in a single Docker image for exploration of agentic workflows. 
+2. **[SGLang on ECS: efficiently serving leading OSS LLMs](docs/sglang.md)** (March 2025): experiment and Docker image (get it with `docker pull didierdurand/lic-sglang:al2023-latest`) 
 to load and execute various leading LLMs on an AWS cluster with Elastic Container Service (ECS). Specific preliminary tests 
 with Qwen QwQ-32B to explore its reasoning capabilities.
-2. **[Wan AI v2.1 video generation](docs/wan2-1.md)** (March 2025): experiment and Docker image (get it with `ddocker pull didierdurand/lic-wan-ai:latest`) 
+3. **[Wan AI v2.1 video generation](docs/wan2-1.md)** (March 2025): experiment and Docker image (get it with `ddocker pull didierdurand/lic-wan-ai:latest`) 
 to generate videos with Alibaba's Wan AI v2.1 models on an AWS cluster with Elastic Container Service (ECS).
-3. **[HuggingFace to S3 Download](/docs/hf-download.md)** (February 2025): a simple AWS CloudFormation template to instantiate in your AWS account in order to efficiently 
+4. **[HuggingFace to S3 Download](/docs/hf-download.md)** (February 2025): a simple AWS CloudFormation template to instantiate in your AWS account in order to efficiently 
 download families of LLMs from HuggingFace to AWS S3 bucket storage without ever transiting via your laptop or server.
 
 
