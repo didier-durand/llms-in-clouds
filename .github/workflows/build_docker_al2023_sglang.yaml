@@ -16,7 +16,7 @@ jobs:
 
     env:
       DOCKER_FILE: 'docker/Dockerfile-al2023-sglang'
-      IMG_TAG: 'didierdurand/lic-sglang:al2023-0.4.3.post4'
+      IMG_TAGS: 'didierdurand/lic-sglang:al2023-0.4.4.post1,didierdurand/lic-sglang:al2023-latest'
 
     steps:
 
@@ -63,4 +63,4 @@ jobs:
         with:
           push: true
           file: ${{env.DOCKER_FILE}}
-          tags: ${{env.IMG_TAG}}
+          tags: ${{env.IMG_TAGS}}

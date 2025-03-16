@@ -16,7 +16,7 @@ jobs:
 
     env:
       DOCKER_FILE: 'docker/Dockerfile-ubuntu2504-sglang'
-      IMG_TAG: 'didierdurand/lic-sglang:ubuntu2504-0.4.3.post4'
+      IMG_TAGS: 'didierdurand/lic-sglang:ubuntu2504-0.4.4.post1,didierdurand/lic-sglang:ubuntu2504-latest'
 
     steps:
 
@@ -63,4 +63,4 @@ jobs:
         with:
           push: true
           file: ${{env.DOCKER_FILE}}
-          tags: ${{env.IMG_TAG}}
+          tags: ${{env.IMG_TAGS}}
