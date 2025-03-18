@@ -49,21 +49,17 @@ Feel free to re-use, customize and share further as needed.
 
 Happy agentic exploration with OpenManus & SmolLM!
 
-**Note**: 
-
-1. the power of an AI Agent is highly related to the quality and granularity of the knowledge as well as the quality 
+**Note**: the power of an AI Agent is highly related to the quality and granularity of the knowledge as well as the quality 
 of the reasoning of the supporting LLM. So, to judge if OpenManus is suitable for your use cases, you probably will 
 need to switch from SmolLM to a more powerful model. It can be OSS (see our setup with [SGLang](sglang.md) that gives access to most leading 
 OSS LLMs)
-2. To run OpenManus + SmolLM on AWS cloud, give us some time to publish a CloudFormation template to run 
-this Docker image of OpenManus & SmolLM on AWS AppRunner.
 
 We publish here below the Docker build file that we use to build this image on Docker Hub.
 
 ### Initial experiment 
 
 The command to launch OpenManus and have him execute tasks is `docker exec -it openmanus-smollm python3.12 main.py`. 
-To see how OpenManus plans its approach, we hereuse a very simple prompt `Can you tell me the recipe of spaghetti carbonara ?`.
+To see how OpenManus plans its approach, we use here a very simple prompt `Can you tell me the recipe of spaghetti carbonara ?`.
 
 The plan defined by OpenManus with the information provided by SmolLM leads to the use of 3 tools: 
 1. Browser Access to get the recipe from Internet. Google Chrome is installed via PlayWright to obtain a programmatic use 
@@ -502,7 +498,7 @@ time=2025-03-15T09:20:48.851Z level=INFO source=server.go:624 msg="llama runner 
 ### Direct inference with SmolLM 
 
 As seen above, we map the tcp port 11434 on start of Docker image. The purpose is to allow you to do direct inferences 
-with SmolLM via curl or your preferred tool. We also publish some tests via Python.
+with SmolLM via curl or your preferred tool.
 
 ```
 curl --request POST \
