@@ -26,7 +26,7 @@ ARG SGL_PORT=30000
  # debug, info, warning, error
 ARG SGL_LOG_LEVEL="info"
 
-# install headers, tools & utilities
+# install headers, tools & utilities (kernel-devel required by CUDA graph compiler)
 RUN yum update -y \
     && yum install -y awscli wget findutils which grep sed git patch \
     && yum install -y kernel-headers kernel-devel \

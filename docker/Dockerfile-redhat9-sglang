@@ -31,7 +31,7 @@ ARG SGL_LOG_LEVEL="info"
 # hadolint ignore=DL3041
 RUN dnf update -y \
     && dnf install -y wget findutils which grep sed git patch \
-    && dnf install -y kernel-headers kernel-devel \
+    && dnf install -y kernel-headers \
     && dnf clean all
 
 # Python & sglang

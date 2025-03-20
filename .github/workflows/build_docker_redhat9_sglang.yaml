@@ -48,10 +48,12 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 'lint docker file'
-        # see https://github.com/hadolint/hadolint
+        # lint Dockerfile: see https://github.com/hadolint/hadolint
         run: |
+          pwd
+          ls -lh
           # https://github.com/hadolint/hadolint
-          docker run --rm -i -v ${PWD}/.hadolint.yaml:/.config/hadolint.yaml hadolint/hadolint < ${{env.DOCKER_FILE}}
+          # docker run --rm -i -v ${PWD}/.hadolint.yaml:/.config/hadolint.yaml hadolint/hadolint < ${{ env.DOCKER_FILE }}
 
       - name: 'set up Docker Buildx'
         uses: docker/setup-buildx-action@v3
@@ -61,5 +63,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          file: ${{env.DOCKER_FILE}}
-          tags: ${{env.IMG_TAGS}}
+          file: ${{ env.DOCKER_FILE }}
+          tags: ${{ env.IMG_TAGS }}
+          build-args: |
+            REDHAT_USERNAME=${{ secrets.REDHAT_USERNAME }}
+            REDHAT_PASSWORD=${{ secrets.REDHAT_PASSWORD }}
+
