@@ -29,7 +29,7 @@ ARG SGL_LOG_LEVEL="info"
 # install headers, tools & utilities
 RUN yum update -y \
     && yum install -y awscli wget findutils which grep sed git patch \
-    && yum install -y kernel-headers \
+    && yum install -y kernel-headers kernel-devel \
     && yum clean all
 
 # install Python & sglang
