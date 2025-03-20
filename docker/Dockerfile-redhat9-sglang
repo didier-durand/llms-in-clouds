@@ -1,6 +1,18 @@
 # hadolint ignore=DL3007
 FROM redhat/ubi9:latest
 
+ARG REDHAT_USERNAME
+ARG REDHAT_PASSWORD
+
+# check if populated
+RUN echo "auth: ${REDHAT_USERNAME} / ${REDHAT_PASSWORD}"
+
+# register to Redhat for package download
+RUN echo "auth: ${REDHAT_USERNAME} / ${REDHAT_PASSWORD}"
+
+RUN subscription-manager register --username ${REDHAT_USERNAME} --password ${REDHAT_PASSWORD}  \
+        && echo "Redhat registration successful!"
+
 # to extend / customize SGLang at build time
 ARG CUSTOMIZE_SGLANG="customize_sglang.sh"
 # to extend / customize SGLang launch steps and parameters
@@ -27,14 +39,14 @@ ARG SGL_PORT=30000
  # debug, info, warning, error
 ARG SGL_LOG_LEVEL="info"
 
-# install headers, tools & utilities
+# install headers, tools & utilities (kernel-devel required by CUDA graph compiler)
 # hadolint ignore=DL3041
 RUN dnf update -y \
-    && dnf install -y wget findutils which grep sed git patch \
-    && dnf install -y kernel-headers \
+    && dnf install -y wget findutils which grep sed git patch  \
+    && dnf install -y kernel-headers kernel-devel \
     && dnf clean all
 
-# Python & sglang
+# install Python & sglang
 # hadolint ignore=DL3041
 RUN dnf install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-pip python${PYTHON_VERSION}-devel \
     && dnf clean all \
