@@ -1,4 +1,4 @@
-name: 'docker build redhat9 sglang'
+name: 'docker build redhat sglang'
 on:
   push:
     paths:
