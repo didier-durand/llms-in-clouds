@@ -40,7 +40,7 @@ RUN apt-get update -y \
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends python${PYTHON_VERSION} python3-pip python${PYTHON_VERSION}-dev  \
     && python${PYTHON_VERSION} -m pip install --break --upgrade --no-cache-dir "sglang[all]==${SGL_VERSION}" --find-links ${SGL_LINKS} \
-    && python${PYTHON_VERSION} -m pip install --upgrade transformers \
+    && python${PYTHON_VERSION} -m pip install --break --upgrade --no-cache-dir transformers \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
