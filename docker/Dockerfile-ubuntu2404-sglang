@@ -1,4 +1,4 @@
-FROM ubuntu:25.04
+FROM ubuntu:24.04
 
 # to extend / customize SGLang at build time
 ARG CUSTOMIZE_SGLANG="customize_sglang.sh"
@@ -37,13 +37,14 @@ RUN apt-get update -y \
 
 # install Python & sglang
 # hadolint ignore=DL3008
-RUN apt-get update -y \
+RUN apt-get update -y  \
     && apt-get install -y --no-install-recommends python${PYTHON_VERSION} python3-pip python${PYTHON_VERSION}-dev  \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*  \
-    && python${PYTHON_VERSION} -m pip install --break --upgrade --no-cache-dir "sglang[all]==${SGL_VERSION}" --find-links ${SGL_LINKS}
+    && rm -rf /var/lib/apt/lists/*
 
-# to be able to know the build versions at runtime
+RUN python${PYTHON_VERSION} -m pip install --break --upgrade --no-cache-dir "sglang[all]==${SGL_VERSION}" --find-links ${SGL_LINKS}
+
+# save build versions to consult at runtime
 RUN echo "cuda version: ${CUDA_VERSION}" >> sglang_versions.txt \
     && echo "python version: ${PYTHON_VERSION}" >> sglang_versions.txt \
     && echo "torch version: ${TORCH_VERSION}" >> sglang_versions.txt \
