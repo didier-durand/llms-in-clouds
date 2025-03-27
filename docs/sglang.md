@@ -1,7 +1,7 @@
 ## SGLang: the foundational AI/ML runtime for efficient serving of leading OSS LLMs
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![docker build ubuntu2504 sglang](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_ubuntu2504_sglang.yaml/badge.svg)](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_ubuntu2504_sglang.yaml)
+[![docker build ubuntu2404 sglang](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_ubuntu2404_sglang.yaml/badge.svg)](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_ubuntu2404_sglang.yaml)
 [![docker build redhat9 sgLang](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_redhat9_sglang.yaml/badge.svg)](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_redhat9_sglang.yaml)
 [![docker build al2023 sglang](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_al2023_sglang.yaml/badge.svg)](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_docker_al2023_sglang.yaml)
 [![build Python code](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_python.yaml/badge.svg)](https://github.com/didier-durand/llms-in-clouds/actions/workflows/build_python.yaml)
@@ -15,6 +15,7 @@
 
 ### Updates
 
+* March 27th, 2025: Docker images on [Docker Hub](https://hub.docker.com/repository/docker/didierdurand/lic-sglang/general) and Docker build files in directory [docker](../docker) updated to SGLang v0.4.4.post2
 * March 16th, 2025: Docker images on [Docker Hub](https://hub.docker.com/repository/docker/didierdurand/lic-sglang/general) and Docker build files in directory [docker](../docker) updated to SGLang v0.4.4.post1
 
 ### SGLang architecture architecture and features
