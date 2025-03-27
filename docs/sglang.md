@@ -124,9 +124,9 @@ on [this page](https://github.com/didier-durand/llms-in-clouds/actions)
 
 We also provide 2 additional Docker build files with their corresponding pre-built images that you 
 can pull directly from our [Docker Hub repository](https://hub.docker.com/repository/docker/didierdurand/lic-sglang/general):
-* Ubuntu 25.04 (Plucky Puffin): [Dockerfile-ubuntu2504-sglang](../docker/Dockerfile-ubuntu2504-sglang)
+* Ubuntu 24.04 LTS (Noble Numbat): [Dockerfile-ubuntu2404-sglang](../docker/Dockerfile-ubuntu2404-sglang)
 that can be pulled directly with `docker pull didierdurand/lic-sglang:ubuntu2504-latest`
-* Redhat 9 25.04: [Dockerfile-redhat9-sglang](../docker/Dockerfile-redhat9-sglang)
+* Redhat 9: [Dockerfile-redhat9-sglang](../docker/Dockerfile-redhat9-sglang)
 that can be pulled directly with `docker pull didierdurand/lic-sglang:redhat9-latest`
 
 *Key aspects*:

@@ -1,22 +1,22 @@
-name: 'docker build ubuntu2504 sglang'
+name: 'docker build ubuntu2404 sglang'
 
 on:
   push:
     paths:
-      - 'docker/Dockerfile-ubuntu2504-sglang'
+      - 'docker/Dockerfile-ubuntu2404-sglang'
       - 'extend/customize_sglang.sh'
       - 'extend/start_sglang.sh'
-      - '.github/workflows/build_docker_ubuntu2504_sglang.yaml'
+      - 'build_docker_ubuntu2404_sglang.yaml'
       - '.hadolint.yaml'
 
 jobs:
 
-  build_docker_ubuntu2504_sglang:
+  build_docker_ubuntu2404_sglang:
     runs-on: ubuntu-latest
 
     env:
-      DOCKER_FILE: 'docker/Dockerfile-ubuntu2504-sglang'
-      IMG_TAGS: 'didierdurand/lic-sglang:ubuntu2504-0.4.4.post2,didierdurand/lic-sglang:ubuntu2504-latest'
+      DOCKER_FILE: 'docker/Dockerfile-ubuntu2404-sglang'
+      IMG_TAGS: 'didierdurand/lic-sglang:ubuntu2404-0.4.4.post2,didierdurand/lic-sglang:ubuntu2404-latest'
 
     steps:
 
