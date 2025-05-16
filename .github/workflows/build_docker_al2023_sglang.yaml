@@ -1,6 +1,9 @@
 name: 'docker build al2023 sgLang'
 
 on:
+
+  workflow_dispatch:  # Allow manual triggering
+
   push:
     paths:
       - 'docker/Dockerfile-al2023-sglang'

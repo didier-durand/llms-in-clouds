@@ -1,6 +1,9 @@
 name: 'build Python code'
 
 on:
+
+  workflow_dispatch:  # Allow manual triggering
+
   push:
     paths:
       - '.github/workflows/build_python.yaml'
