@@ -14,7 +14,7 @@ WORKDIR "/home/sglang"
 # versions of components
 ARG CUDA_VERSION="124"
 ARG PYTHON_VERSION="3.12"
-ARG TORCH_VERSION="2.5"
+ARG TORCH_VERSION="2.6"
 ARG SGL_VERSION="0.4.7"
 
 ARG SGL_LINKS="https://flashinfer.ai/whl/cu${CUDA_VERSION}/torch${TORCH_VERSION}/flashinfer-python"
