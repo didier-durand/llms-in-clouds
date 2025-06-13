@@ -15,12 +15,24 @@ jobs:
 
   build_docker_ubuntu2404_sglang:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     env:
       DOCKER_FILE: 'docker/Dockerfile-ubuntu2404-sglang'
       IMG_TAGS: 'didierdurand/lic-sglang:ubuntu2404-0.4.7,didierdurand/lic-sglang:ubuntu2404-latest'
 
     steps:
+
+      - name: 'free disk space'
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
 
       - name: 'gain some disk space for build of large images'
         run: |
@@ -32,8 +44,11 @@ jobs:
           echo "Removing large packages"
           sudo apt-get remove -y '^dotnet-.*'
           sudo apt-get remove -y '^llvm-.*'
+          sudo apt-get remove -y '^libllvm.*'
+          sudo apt-get remove -y '^temurin-.*'
           sudo apt-get remove -y 'php.*'
-          sudo apt-get remove -y azure-cli google-cloud-sdk google-chrome-stable firefox powershell mono-devel
+          # sudo apt-get remove -y google-cloud-sdk google-cloud-cli-anthoscli 
+          sudo apt-get remove -y azure-cli microsoft-edge-stable google-chrome-stable firefox powershell mono-devel
           sudo apt-get autoremove -y
           sudo apt-get clean
           df -h
