@@ -1,5 +1,6 @@
 #hadolint ignore=DL3007
 FROM redhat/ubi9:latest
+ARG CUDA_REPO="https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64"
 
 ARG REDHAT_USERNAME
 ARG REDHAT_PASSWORD
@@ -13,6 +14,11 @@ RUN echo "auth: ${REDHAT_USERNAME} / ${REDHAT_PASSWORD}"
 RUN subscription-manager register --username ${REDHAT_USERNAME} --password ${REDHAT_PASSWORD}  \
         && echo "Redhat registration successful!"
 
+RUN subscription-manager repos --enable=rhel-9-for-x86_64-appstream-rpms  \
+    && subscription-manager repos --enable=rhel-9-for-x86_64-baseos-rpms  \
+    && subscription-manager repos --enable=codeready-builder-for-rhel-9-x86_64-rpms \
+    && echo "Additional repositories enabled!"
+
 # to extend / customize SGLang at build time
 ARG CUSTOMIZE_SGLANG="customize_sglang.sh"
 # to extend / customize SGLang launch steps and parameters
@@ -25,13 +31,12 @@ WORKDIR ${SGL_MODEL_DIR}
 WORKDIR "/home/sglang"
 
 # versions of components
-ARG CUDA_VERSION="124"
+ARG CUDA_VERSION="12-6"
 ARG PYTHON_VERSION="3.12"
-ARG TORCH_VERSION="2.5"
+ARG TORCH_VERSION="2.6"
 ARG SGL_VERSION="0.4.7"
 
-ARG SGL_LINKS="https://flashinfer.ai/whl/cu${CUDA_VERSION}/torch${TORCH_VERSION}/flashinfer-python"
-ARG SGLANG_TP_SIZE=2
+ARG SGL_TP_SIZE=2
 
 ARG SGL_HOST="0.0.0.0"
 ARG SGL_PORT=30000
@@ -42,9 +47,23 @@ ARG SGL_LOG_LEVEL="info"
 # install headers, tools & utilities (kernel-devel required by CUDA graph compiler)
 # hadolint ignore=DL3041
 RUN dnf update -y \
-    && dnf install -y wget findutils which grep sed git patch  \
+    && dnf install -y wget findutils which grep sed git patch zlib ca-certificates \
     && dnf install -y kernel-headers kernel-devel \
     && dnf clean all
+
+# package dkms from EPEL is required by nvidia-fs-dkms
+# hadolint ignore=DL3041
+RUN dnf config-manager --add-repo ${CUDA_REPO}/cuda-rhel9.repo  \
+    && dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm  \
+    && dnf install -y cuda-toolkit-${CUDA_VERSION}  \
+    && dnf install -y nvidia-gds-${CUDA_VERSION}  \
+    && dnf install -y --allowerasing cudnn9-cuda-12  \
+    && dnf install -y libcusparselt0 libcusparselt-devel \
+    && dnf install -y libnccl libnccl-devel libnccl-static \
+    && dnf clean all
+
+ENV PATH=${PATH}:/usr/local/cuda-12.6/bin
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda-12.6/lib64
 
 # install Python & sglang
 # hadolint ignore=DL3041
@@ -53,8 +72,7 @@ RUN dnf install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-pip python${P
     && python${PYTHON_VERSION} -m ensurepip \
     && python${PYTHON_VERSION} -m pip install --upgrade pip \
     && python${PYTHON_VERSION} -m pip install --upgrade awscli \
-    && python${PYTHON_VERSION} -m pip install --upgrade --no-cache-dir "sglang[all]==${SGL_VERSION}" --find-links ${SGL_LINKS} \
-    && python${PYTHON_VERSION} -m pip install --upgrade transformers
+    && python${PYTHON_VERSION} -m pip install --upgrade --no-cache-dir "sglang[all]==${SGL_VERSION}"
 
 # to be able to know the build versions at runtime
 RUN echo "cuda version: ${CUDA_VERSION}" >> sglang_versions.txt \
@@ -64,8 +82,8 @@ RUN echo "cuda version: ${CUDA_VERSION}" >> sglang_versions.txt \
 
 COPY "extend/"${CUSTOMIZE_SGLANG} ${CUSTOMIZE_SGLANG}
 COPY "extend/"${START_SGLANG} ${START_SGLANG}
-RUN ls -lh \
-    && bash ${CUSTOMIZE_SGLANG}
+RUN ls -lh
+    # && bash ${CUSTOMIZE_SGLANG}
 
 # turn needed build args into runtime env vars
 # set up python version
