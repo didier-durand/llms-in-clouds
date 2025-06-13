@@ -15,6 +15,7 @@ WORKDIR "/home/sglang"
 # versions of components
 ARG CUDA_VERSION_MAJOR="12"
 ARG CUDA_VERSION_DASH="12-6"
+ARG CUDA_VERSION_DOT="12.6"
 ARG PYTHON_VERSION="3.12"
 ARG TORCH_VERSION="2.6"
 ARG SGL_VERSION="0.4.7"
@@ -31,7 +32,7 @@ ARG SGL_LOG_LEVEL="info"
 # hadolint ignore=DL3008
 RUN apt-get update -y \
     && apt-get upgrade -y  \
-    && apt-get install -y --no-install-recommends curl wget findutils which grep sed git patch ca-certificates \
+    && apt-get install -y --no-install-recommends curl wget findutils which grep sed git patch zlib ca-certificates \
     && apt-get install -y --no-install-recommends linux-headers-generic \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -46,14 +47,14 @@ RUN wget --quiet --no-check-certificate ${CUDA_REPO}/cuda-keyring_1.1-1_all.deb 
     && apt-get upgrade -y  \
     && apt-get install -y --no-install-recommends cuda-toolkit-${CUDA_VERSION_DASH}  \
     && apt-get install -y --no-install-recommends nvidia-gds-${CUDA_VERSION_DASH} \
-    && apt-get install -y --no-install-recommends cudnn9-cuda-${CUDA_VERSION_DASH} libcudnn9-static-cuda-${CUDA_VERSION_MAJOR}=9.6.0.74-1 libcudnn9-dev-cuda-${CUDA_VERSION_MAJOR}=9.6.0.74-1 \
+    && apt-get install -y --no-install-recommends cudnn9-cuda-${CUDA_VERSION_DASH} libcudnn9-static-cuda-${CUDA_VERSION_MAJOR}=9.6.0.74-1 libcudnn9-dev-cuda-${CUDA_VERSION_MAJOR}=9.6.0.74-1 libcudnn9-cuda-${CUDA_VERSION_MAJOR}=9.6.0.74-1 \
     && apt-get install -y --no-install-recommends libcusparselt0 libcusparselt-devel \
     && apt-get install -y --no-install-recommends libnccl libnccl-devel libnccl-static \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-ENV PATH=${PATH}:/usr/local/cuda-12.6/bin
-ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda-12.6/lib64
+ENV PATH=${PATH}:/usr/local/cuda-${CUDA_VERSION_DOT}/bin
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda-${CUDA_VERSION_DOT}/lib64
 
 # install Python
 # hadolint ignore=DL3008
