@@ -81,3 +81,11 @@ jobs:
           push: true
           file: ${{env.DOCKER_FILE}}
           tags: ${{env.IMG_TAGS}}
+
+      - name: 'build and push image to Docker Hub'
+        if: github.repository != 'didier-durand/llms-in-clouds'
+        uses: docker/build-push-action@v6
+        with:
+          push: false
+          file: ${{env.DOCKER_FILE}}
+          tags: ${{env.IMG_TAGS}}
