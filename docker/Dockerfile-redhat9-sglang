@@ -12,9 +12,8 @@ RUN echo "auth: ${REDHAT_USERNAME} / ${REDHAT_PASSWORD}"
 RUN echo "auth: ${REDHAT_USERNAME} / ${REDHAT_PASSWORD}"
 
 RUN subscription-manager register --username ${REDHAT_USERNAME} --password ${REDHAT_PASSWORD}  \
-        && echo "Redhat registration successful!"
-
-RUN subscription-manager repos --enable=rhel-9-for-x86_64-appstream-rpms  \
+    && echo "Redhat registration successful!"  \
+    && subscription-manager repos --enable=rhel-9-for-x86_64-appstream-rpms  \
     && subscription-manager repos --enable=rhel-9-for-x86_64-baseos-rpms  \
     && subscription-manager repos --enable=codeready-builder-for-rhel-9-x86_64-rpms \
     && echo "Additional repositories enabled!"
@@ -31,7 +30,9 @@ WORKDIR ${SGL_MODEL_DIR}
 WORKDIR "/home/sglang"
 
 # versions of components
-ARG CUDA_VERSION="12-6"
+ARG CUDA_VERSION_MAJOR="12"
+ARG CUDA_VERSION_DASH="12-6"
+ARG CUDA_VERSION_DOT="12.6"
 ARG PYTHON_VERSION="3.12"
 ARG TORCH_VERSION="2.6"
 ARG SGL_VERSION="0.4.7"
@@ -55,15 +56,15 @@ RUN dnf update -y \
 # hadolint ignore=DL3041
 RUN dnf config-manager --add-repo ${CUDA_REPO}/cuda-rhel9.repo  \
     && dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm  \
-    && dnf install -y cuda-toolkit-${CUDA_VERSION}  \
-    && dnf install -y nvidia-gds-${CUDA_VERSION}  \
-    && dnf install -y --allowerasing cudnn9-cuda-12  \
+    && dnf install -y cuda-toolkit-${CUDA_VERSION_DASH}  \
+    && dnf install -y nvidia-gds-${CUDA_VERSION_DASH}  \
+    && dnf install -y --allowerasing cudnn9-cuda-${CUDA_VERSION_MAJOR}  \
     && dnf install -y libcusparselt0 libcusparselt-devel \
     && dnf install -y libnccl libnccl-devel libnccl-static \
     && dnf clean all
 
-ENV PATH=${PATH}:/usr/local/cuda-12.6/bin
-ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda-12.6/lib64
+ENV PATH=${PATH}:/usr/local/cuda-${CUDA_VERSION_DOT}/bin
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda-${CUDA_VERSION_DOT}/lib64
 
 # install Python & sglang
 # hadolint ignore=DL3041
@@ -75,7 +76,7 @@ RUN dnf install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-pip python${P
     && python${PYTHON_VERSION} -m pip install --upgrade --no-cache-dir "sglang[all]==${SGL_VERSION}"
 
 # to be able to know the build versions at runtime
-RUN echo "cuda version: ${CUDA_VERSION}" >> sglang_versions.txt \
+RUN echo "cuda version: ${CUDA_VERSION_DOT}" >> sglang_versions.txt \
     && echo "python version: ${PYTHON_VERSION}" >> sglang_versions.txt \
     && echo "torch version: ${TORCH_VERSION}" >> sglang_versions.txt \
     && echo "sglang version: ${SGL_VERSION}" >> sglang_versions.txt
