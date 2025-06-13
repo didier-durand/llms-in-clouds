@@ -45,10 +45,10 @@ RUN wget --quiet --no-check-certificate ${CUDA_REPO}/cuda-keyring_1.1-1_all.deb 
     && apt-get update -y \
     && apt-get upgrade -y  \
     && apt-get install -y --no-install-recommends cuda-toolkit-${CUDA_VERSION_DASH}  \
-    && apt-get install -y  --no-install-recommends nvidia-gds-${CUDA_VERSION_DASH} \
-    && apt-get install -y cudnn9-cuda-${CUDA_VERSION_DASH} \
-    && apt-get install -y libcusparselt0 libcusparselt-devel \
-    && apt-get install -y libnccl libnccl-devel libnccl-static \
+    && apt-get install -y --no-install-recommends nvidia-gds-${CUDA_VERSION_DASH} \
+    && apt-get install -y --no-install-recommends cudnn9-cuda-${CUDA_VERSION_DASH} \
+    && apt-get install -y --no-install-recommends libcusparselt0 libcusparselt-devel \
+    && apt-get install -y --no-install-recommends libnccl libnccl-devel libnccl-static \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
