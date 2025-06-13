@@ -32,7 +32,7 @@ ARG SGL_LOG_LEVEL="info"
 # hadolint ignore=DL3008
 RUN apt-get update -y \
     && apt-get upgrade -y  \
-    && apt-get install -y --no-install-recommends curl wget findutils which grep sed git patch zlib ca-certificates \
+    && apt-get install -y --no-install-recommends curl wget findutils which grep sed git patch ca-certificates \
     && apt-get install -y --no-install-recommends linux-headers-generic \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
