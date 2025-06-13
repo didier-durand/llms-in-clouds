@@ -9,9 +9,8 @@ ARG REDHAT_PASSWORD
 RUN echo "auth: ${REDHAT_USERNAME} / ${REDHAT_PASSWORD}"
 
 # register to Redhat for package download
-RUN echo "auth: ${REDHAT_USERNAME} / ${REDHAT_PASSWORD}"
-
-RUN subscription-manager register --username ${REDHAT_USERNAME} --password ${REDHAT_PASSWORD}  \
+RUN echo "auth: ${REDHAT_USERNAME} / ${REDHAT_PASSWORD}" \
+    && subscription-manager register --username ${REDHAT_USERNAME} --password ${REDHAT_PASSWORD}  \
     && echo "Redhat registration successful!"  \
     && subscription-manager repos --enable=rhel-9-for-x86_64-appstream-rpms  \
     && subscription-manager repos --enable=rhel-9-for-x86_64-baseos-rpms  \
