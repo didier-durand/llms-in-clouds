@@ -1,6 +1,6 @@
 #hadolint ignore=DL3007
 FROM redhat/ubi9:latest
-ARG CUDA_REPO="https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64"
+ARG CUDA_REPO="https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo"
 
 ARG REDHAT_USERNAME
 ARG REDHAT_PASSWORD
@@ -53,7 +53,7 @@ RUN dnf update -y \
 
 # package dkms from EPEL is required by nvidia-fs-dkms
 # hadolint ignore=DL3041
-RUN dnf config-manager --add-repo ${CUDA_REPO}/cuda-rhel9.repo  \
+RUN dnf config-manager --add-repo ${CUDA_REPO}  \
     && dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm  \
     && dnf install -y cuda-toolkit-${CUDA_VERSION_DASH}  \
     && dnf install -y nvidia-gds-${CUDA_VERSION_DASH}  \
