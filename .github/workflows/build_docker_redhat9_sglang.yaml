@@ -19,7 +19,7 @@ jobs:
 
     env:
       DOCKER_FILE: 'docker/Dockerfile-redhat9-sglang'
-      IMG_TAGS: 'didierdurand/lic-sglang:redhat9-0.4.9.post6,didierdurand/lic-sglang:redhat9-latest'
+      IMG_TAGS: 'didierdurand/lic-sglang:redhat9-0.4.10.post1,didierdurand/lic-sglang:redhat9-latest'
 
     steps:
 
