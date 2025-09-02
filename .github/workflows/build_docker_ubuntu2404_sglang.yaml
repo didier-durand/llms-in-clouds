@@ -19,7 +19,7 @@ jobs:
 
     env:
       DOCKER_FILE: 'docker/Dockerfile-ubuntu2404-sglang'
-      IMG_TAGS: 'didierdurand/lic-sglang:ubuntu2404-0.5.1.post3,didierdurand/lic-sglang:ubuntu2404-latest'
+      IMG_TAGS: 'didierdurand/lic-sglang:ubuntu2404-0.5.2rc0,didierdurand/lic-sglang:ubuntu2404-latest'
 
     steps:
 
